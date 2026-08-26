@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA, Replikation, PCR & genetischer Fingerabdruck – Test (Bio LK)</title>
+<style>
+  :root{
+    --paper:#F7F4EC;
+    --card:#FFFFFF;
+    --ink:#1C2541;
+    --ink-soft:#5B6478;
+    --teal:#1B7F79;
+    --teal-dark:#125E59;
+    --teal-pale:#E4F2F0;
+    --amber:#C97A1A;
+    --amber-pale:#FBF0DE;
+    --green:#2F7D4F;
+    --green-pale:#E7F4EC;
+    --red:#B23A2C;
+    --red-pale:#FBEAE7;
+    --line:#E1DBC8;
+    --lane-rest:#D8D2BC;
+    --lane-stripe:rgba(28,37,65,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 18px 120px;}
+  header h1{
+    font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    font-size:1.6rem;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  header p.sub{
+    margin:0 0 18px;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+  }
+  .infobox{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-left:4px solid var(--teal);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:22px;
+    font-size:0.88rem;
+    color:var(--ink-soft);
+  }
+  .infobox b{color:var(--ink);}
+  .infobox ul{margin:8px 0 0;padding-left:20px;}
+  .infobox li{margin-bottom:4px;}
+
+  .progressbar{
+    position:sticky;top:0;z-index:30;
+    background:var(--paper);
+    padding:10px 0 12px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:6px;
+  }
+  .progress-track{
+    height:6px;background:var(--line);border-radius:4px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;width:0%;background:var(--teal);transition:width .25s ease;
+  }
+  .progress-label{
+    font-size:0.78rem;color:var(--ink-soft);margin-top:6px;display:flex;justify-content:space-between;
+  }
+
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    font-size:0.7rem;
+    font-weight:700;
+    color:var(--teal-dark);
+  }
+  .badge{
+    display:inline-block;
+    font-size:0.68rem;
+    font-weight:600;
+    padding:2px 9px;
+    border-radius:99px;
+    border:1px solid var(--teal);
+    color:var(--teal-dark);
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  .badge.multi{border-color:var(--amber);color:var(--amber);}
+
+  .qcard{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 18px 18px 30px;
+    margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(28,37,65,0.04);
+  }
+  .lane{
+    position:absolute;left:0;top:0;bottom:0;width:11px;
+    border-radius:12px 0 0 12px;
+    background-color:var(--lane-rest);
+    background-image:repeating-linear-gradient(to bottom, var(--lane-stripe) 0px, var(--lane-stripe) 3px, transparent 3px, transparent 10px);
+    transition:background-color .3s ease;
+  }
+  .lane.active{background-color:#BDB69B;}
+  .lane.correct{background-color:var(--green);background-image:repeating-linear-gradient(to bottom, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 3px, transparent 3px, transparent 10px);}
+  .lane.incorrect{background-color:var(--red);background-image:repeating-linear-gradient(to bottom, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 3px, transparent 3px, transparent 10px);}
+
+  .qhead{margin-bottom:10px;}
+  .qtext{font-size:1rem;margin:6px 0 12px;color:var(--ink);}
+  .qnum{color:var(--ink-soft);font-weight:600;}
+
+  .options{display:flex;flex-direction:column;gap:8px;}
+  .opt{
+    display:flex;align-items:flex-start;gap:10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    cursor:pointer;
+    min-height:44px;
+    font-size:0.92rem;
+    transition:background .15s ease,border-color .15s ease;
+  }
+  .opt:hover{background:var(--teal-pale);}
+  .opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--teal-dark);flex-shrink:0;}
+  .opt.opt-correct{background:var(--green-pale);border-color:var(--green);}
+  .opt.opt-incorrect-selected{background:var(--red-pale);border-color:var(--red);}
+  .opt.opt-missed{border-color:var(--green);border-style:dashed;}
+  .opt-tag{font-size:0.72rem;font-weight:700;margin-left:auto;padding-left:8px;white-space:nowrap;}
+  .opt-tag.ok{color:var(--green);}
+  .opt-tag.bad{color:var(--red);}
+
+  .explanation{
+    display:none;
+    margin-top:12px;
+    background:var(--amber-pale);
+    border:1px solid var(--amber);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:0.86rem;
+    color:#5c4007;
+  }
+  .explanation b{color:var(--amber);}
+  .qcard.graded .explanation{display:block;}
+  .qcard.graded .opt{cursor:default;}
+  .qcard.graded .opt:hover{background:inherit;}
+
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:linear-gradient(to top, var(--paper) 70%, rgba(247,244,236,0));
+    padding:18px 18px 22px;
+    display:flex;justify-content:center;
+  }
+  .actionbar.hidden{display:none;}
+  button.evaluate{
+    background:var(--teal-dark);color:#fff;border:none;
+    padding:13px 28px;border-radius:99px;font-size:1rem;font-weight:700;
+    box-shadow:0 4px 14px rgba(18,94,89,0.35);cursor:pointer;
+    max-width:760px;width:100%;
+  }
+  button.evaluate:active{transform:translateY(1px);}
+  button.reset{
+    background:transparent;color:var(--ink-soft);border:1px solid var(--line);
+    padding:10px 20px;border-radius:99px;font-size:0.88rem;cursor:pointer;margin-top:10px;
+  }
+
+  .summary{
+    display:none;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:20px;margin-bottom:24px;
+  }
+  .summary.show{display:block;}
+  .summary h2{margin:0 0 4px;font-family:Georgia,serif;font-size:1.3rem;}
+  .summary .scoreline{font-size:2.1rem;font-weight:800;color:var(--teal-dark);margin:6px 0;}
+  .summary .scoreline span{font-size:1rem;color:var(--ink-soft);font-weight:500;}
+  .summary table{width:100%;border-collapse:collapse;margin-top:14px;font-size:0.86rem;}
+  .summary td,.summary th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;}
+  .summary th{color:var(--ink-soft);font-weight:600;}
+  .bar-bg{background:var(--line);border-radius:4px;height:8px;width:120px;overflow:hidden;display:inline-block;vertical-align:middle;}
+  .bar-fill{height:100%;background:var(--teal);}
+  .note{font-size:0.78rem;color:var(--ink-soft);margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>DNA als Erbsubstanz – Replikation, PCR &amp; genetischer Fingerabdruck</h1>
+    <p class="sub">Test für den Biologie-Leistungskurs · selbstauswertend, läuft komplett offline auf dem iPad</p>
+  </header>
+
+  <div class="infobox">
+    <b>Hinweise zur Bearbeitung:</b>
+    <ul>
+      <li>Fragen mit der Markierung <b>Einfachauswahl</b> haben genau <b>eine</b> richtige Antwort (1 Punkt).</li>
+      <li>Fragen mit der Markierung <b>Mehrfachauswahl</b> können <b>mehrere</b> richtige Antworten haben. Volle Punktzahl (2 Punkte) gibt es nur, wenn <b>alle</b> richtigen <b>und keine</b> falschen Antworten angekreuzt sind.</li>
+      <li>Insgesamt sind <b>29 Punkte</b> erreichbar (19 × Einfachauswahl + 5 × Mehrfachauswahl).</li>
+      <li>Am Ende auf <b>„Test auswerten“</b> tippen – dann werden alle Antworten farbig markiert und mit einer Erklärung versehen.</li>
+    </ul>
+  </div>
+
+  <div class="progressbar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label"><span id="progressText">0 / 24 beantwortet</span><span>29 Punkte möglich</span></div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div id="quiz"></div>
+</div>
+
+<div class="actionbar" id="actionbar">
+  <div style="max-width:760px;width:100%;text-align:center;">
+    <button class="evaluate" id="evalBtn">Test auswerten</button>
+    <div><button class="reset" id="resetBtn">Neu starten</button></div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+{id:1, topic:"DNA-Aufbau & Nukleinsäuren", type:"single",
+ q:"Welche drei Bestandteile bilden ein Nukleotid der DNA?",
+ opts:["Eine Ribose, eine Base und ein Fettsäurerest","Zwei Basen, ein Zucker und ein Strukturprotein","Eine Aminosäure, ein Zucker und eine Base","Ein Phosphatrest, eine Ribose und eine Aminosäure","Ein Phosphatrest, eine Desoxyribose und eine Base"],
+ correct:[4],
+ exp:"Ein Nukleotid besteht aus Phosphatrest, Zucker (bei DNA: Desoxyribose) und einer stickstoffhaltigen Base. Ohne Phosphatrest spricht man von einem Nukleosid."},
+
+{id:2, topic:"DNA-Aufbau & Nukleinsäuren", type:"multi",
+ q:"Welche Aussagen zur Basenpaarung in der DNA sind korrekt?",
+ opts:["GC-reiche DNA-Abschnitte sind stabiler und schmelzen später als AT-reiche Abschnitte.","Adenin und Guanin gehören beide zur Gruppe der Pyrimidinbasen im DNA-Molekül.","Adenin paart mit Thymin über zwei Wasserstoffbrücken.","Die Basenpaarung erfolgt nach dem Prinzip der Komplementarität.","Guanin paart mit Cytosin über drei Wasserstoffbrücken."],
+ correct:[0,2,3,4],
+ exp:"A–T bildet 2, G–C bildet 3 Wasserstoffbrücken (komplementäre Basenpaarung). Adenin und Guanin sind Purine, nicht Pyrimidine – Pyrimidine sind Thymin und Cytosin. Die zusätzliche Wasserstoffbrücke macht GC-reiche Bereiche stabiler und schwerer aufzutrennen, was später bei der PCR-Temperaturwahl relevant ist."},
+
+{id:3, topic:"DNA-Aufbau & Nukleinsäuren", type:"single",
+ q:"Wodurch unterscheidet sich RNA strukturell von DNA am deutlichsten?",
+ opts:["RNA enthält Ribose statt Desoxyribose und besitzt anstelle von Thymin die Base Uracil.","RNA enthält Desoxyribose statt Ribose und liegt bevorzugt als Doppelstrang vor, ähnlich wie DNA.","RNA besitzt zusätzlich die seltene Base Inosin und bildet stets ringförmige Moleküle.","RNA unterscheidet sich von DNA lediglich durch eine geringere Anzahl an Phosphatresten."],
+ correct:[0],
+ exp:"RNA enthält Ribose (statt Desoxyribose), verwendet Uracil statt Thymin und liegt meist einzelstrangig vor."},
+
+{id:4, topic:"DNA-Aufbau & Nukleinsäuren", type:"single",
+ q:"In einem doppelstrangigen DNA-Molekül wurden 22 % der Basen als Adenin bestimmt. Wie hoch ist der Anteil an Guanin?",
+ opts:["39 %","56 %","22 %","28 %"],
+ correct:[3],
+ exp:"Nach der Chargaff-Regel gilt %A = %T und %G = %C. Bei 22 % A ist auch T = 22 %, zusammen 44 %. Die restlichen 56 % verteilen sich gleich auf G und C, also je 28 %."},
+
+{id:5, topic:"DNA-Aufbau & Nukleinsäuren", type:"single",
+ q:"Welche Aussage zur Doppelhelix-Struktur ist korrekt?",
+ opts:["Nur ein Strang trägt genetische Information, der andere ist rein strukturell und besitzt keine codierende Funktion.","Beide Einzelstränge verlaufen parallel zueinander, also in dieselbe Richtung von 5' nach 3'.","Die beiden Einzelstränge verlaufen antiparallel zueinander (5'→3' bzw. 3'→5').","Das Zucker-Phosphat-Rückgrat befindet sich im Inneren der Helix, die Basen liegen außen und frei zugänglich."],
+ correct:[2],
+ exp:"Die beiden Einzelstränge der DNA-Doppelhelix verlaufen antiparallel. Das Zucker-Phosphat-Rückgrat liegt außen, die Basen zeigen ins Innere und bilden dort die Wasserstoffbrücken."},
+
+{id:6, topic:"Replikation & Enzyme", type:"single",
+ q:"Was besagt das Prinzip der semikonservativen Replikation, wie es im Meselson-Stahl-Experiment gezeigt wurde?",
+ opts:["Jedes Tochtermolekül besteht aus einem Elternstrang und einem neu synthetisierten Strang.","Es entsteht ein komplett neuer Doppelstrang, der keine Anteile des Elternstrangs enthält.","Nur ein Tochtermolekül enthält elterliche DNA, das andere ist komplett neu.","Die DNA wird in kleine Fragmente zerlegt und komplett neu zusammengesetzt."],
+ correct:[0],
+ exp:"Semikonservativ bedeutet: Jede Tochter-DNA besteht aus einem alten (elterlichen) und einem neu synthetisierten Strang – das Meselson-Stahl-Experiment mit ¹⁵N/¹⁴N-markierter DNA bestätigte dies."},
+
+{id:7, topic:"Replikation & Enzyme", type:"multi",
+ q:"Welche Aussagen zu den Enzymen/Proteinen der Replikation sind korrekt?",
+ opts:["Die Primase synthetisiert einen kurzen DNA-Primer als Startpunkt für die DNA-Polymerase.","Die Helicase entwindet die Doppelhelix durch Lösen der Wasserstoffbrücken zwischen den Basen.","Die DNA-Polymerase III kann eigenständig, ohne Primer, mit der Synthese eines neuen Strangs beginnen.","Die Topoisomerase (Gyrase) löst die Verdrillungsspannung, die vor der Replikationsgabel durch das Entwinden entsteht.","Einzelstrang-bindende Proteine (SSB) verhindern, dass sich die getrennten Einzelstränge wieder zusammenlagern."],
+ correct:[1,3,4],
+ exp:"Helicase, Topoisomerase und SSB-Proteine sind korrekt beschrieben. Die Primase synthetisiert einen RNA-Primer (nicht DNA), und die DNA-Polymerase III benötigt zwingend ein freies 3'-OH-Ende, kann also nicht ohne Primer starten."},
+
+{id:8, topic:"Replikation & Enzyme", type:"single",
+ q:"Warum kann die DNA-Polymerase einen neuen Strang nicht ohne Primer beginnen?",
+ opts:["Sie benötigt zwingend eine durchgehende RNA-Matrize anstelle der DNA-Matrize.","Sie ist nur bei niedrigen Temperaturen unterhalb von etwa 20 °C überhaupt aktiv.","Ihr fehlt ohne Primer vollständig die 3'→5'-Korrekturlesefunktion.","Sie kann Nukleotide nur an ein vorhandenes freies 3'-OH-Ende anhängen."],
+ correct:[3],
+ exp:"DNA-Polymerasen können nur verlängern, nicht neu starten – sie benötigen ein freies 3'-OH-Ende, das der Primer liefert."},
+
+{id:9, topic:"Replikation & Enzyme", type:"single",
+ q:"Welche Aussage zur Syntheserichtung bei der Replikation ist korrekt?",
+ opts:["Die DNA-Polymerase liest die Matrize in 5'→3'-Richtung und synthetisiert den neuen Strang in 3'→5'-Richtung.","Die DNA-Polymerase liest die Matrize in 3'→5'-Richtung und synthetisiert den neuen Strang in 5'→3'-Richtung.","Beide Stränge werden stets gleichzeitig und in identischer 5'→3'-Richtung neu synthetisiert.","Die Syntheserichtung hängt von der Ionenstärke des umgebenden Puffers ab, nicht von der Matrize."],
+ correct:[1],
+ exp:"DNA-Polymerasen lesen die Matrize stets in 3'→5'-Richtung und bauen den neuen Strang in 5'→3'-Richtung auf."},
+
+{id:10, topic:"Okazaki-Fragmente", type:"single",
+ q:"Warum entstehen am Folgestrang (lagging strand) Okazaki-Fragmente, am Leitstrang (leading strand) aber nicht?",
+ opts:["Weil die DNA-Polymerase nur in 5'→3'-Richtung arbeitet, sodass der Folgestrang nur diskontinuierlich synthetisiert werden kann.","Weil der Folgestrang von einer vollständig anderen, deutlich langsameren Polymerase als der Leitstrang synthetisiert wird.","Weil am Folgestrang im Unterschied zum Leitstrang grundsätzlich keine RNA-Primer benötigt werden.","Weil sich die Replikationsgabel am Folgestrang im Gegensatz zum Leitstrang nur in eine einzige Richtung öffnet."],
+ correct:[0],
+ exp:"Da Polymerasen nur 5'→3' synthetisieren können und die beiden Matrizenstränge antiparallel sind, kann nur ein Strang kontinuierlich in Richtung der sich öffnenden Gabel synthetisiert werden (Leitstrang). Am Folgestrang muss die Synthese in kurzen, wiederholt neu gestarteten Abschnitten – den Okazaki-Fragmenten – entgegen der Gabelöffnung erfolgen."},
+
+{id:11, topic:"Okazaki-Fragmente", type:"multi",
+ q:"Was geschieht im weiteren Verlauf der Replikation mit den RNA-Primern und den Okazaki-Fragmenten?",
+ opts:["Die Ligase ersetzt die RNA-Primer direkt und eigenständig durch neue DNA-Nukleotide.","Die RNA-Primer werden von der DNA-Polymerase I (mit Exonukleaseaktivität) entfernt.","Die RNA-Primer bleiben dauerhaft und unverändert im fertigen, reifen DNA-Strang erhalten.","Die Ligase verknüpft benachbarte DNA-Abschnitte über eine Phosphodiesterbindung.","Die entstandenen Lücken werden von der DNA-Polymerase I mit DNA-Nukleotiden aufgefüllt."],
+ correct:[1,3,4],
+ exp:"DNA-Polymerase I entfernt die RNA-Primer und füllt die Lücken mit DNA auf; die Ligase verknüpft anschließend nur noch die verbleibenden Einzelstrangbrüche (Nicks) durch eine Phosphodiesterbindung zwischen 3'-OH- und 5'-Phosphat-Ende. Sie ersetzt selbst keine Nukleotide, und RNA-Primer bleiben nicht erhalten."},
+
+{id:12, topic:"Replikation & Enzyme", type:"single",
+ q:"Welche Funktion hat die 3'→5'-Exonukleaseaktivität (Korrekturlesefunktion) der DNA-Polymerase III?",
+ opts:["Sie entfernt RNA-Primer vollständig und eigenständig vor Abschluss der Replikation.","Sie entwindet die DNA-Doppelhelix durch Lösen der Wasserstoffbrücken zwischen den Basen.","Sie erkennt falsch eingebaute Nukleotide und entfernt sie sofort wieder.","Sie verkürzt den neu synthetisierten Strang gezielt um die Telomersequenzen."],
+ correct:[2],
+ exp:"Die Korrekturlesefunktion (proofreading) erkennt fehlerhaft eingebaute Basen sofort und entfernt sie wieder, was die Replikationsgenauigkeit deutlich erhöht."},
+
+{id:13, topic:"PCR", type:"single",
+ q:"In welcher Reihenfolge laufen die drei Schritte eines PCR-Zyklus ab?",
+ opts:["Elongation → Denaturierung → Primer-Hybridisierung","Primer-Hybridisierung → Elongation → Denaturierung","Denaturierung → Elongation → Primer-Hybridisierung","Denaturierung → Primer-Hybridisierung → Elongation"],
+ correct:[3],
+ exp:"Ein PCR-Zyklus läuft immer in der Reihenfolge Denaturierung → Annealing (Primer-Hybridisierung) → Elongation ab."},
+
+{id:14, topic:"PCR", type:"multi",
+ q:"Welche Temperaturangaben passen zu den jeweiligen PCR-Schritten (typische Richtwerte)?",
+ opts:["Elongation durch die Taq-Polymerase: ca. 95 °C, also bei sehr hoher Temperatur","Denaturierung der doppelsträngigen DNA: ca. 94–96 °C","Denaturierung der doppelsträngigen DNA: ca. 37 °C, also bei Körpertemperatur","Elongation: ca. 72 °C, dem Temperaturoptimum der Taq-Polymerase","Primer-Hybridisierung (Annealing): ca. 50–65 °C"],
+ correct:[1,3,4],
+ exp:"Denaturierung erfolgt bei ca. 94–96 °C (Auftrennung des Doppelstrangs), Annealing bei ca. 50–65 °C (abhängig von Primersequenz/GC-Gehalt) und Elongation bei ca. 72 °C, dem Temperaturoptimum der Taq-Polymerase."},
+
+{id:15, topic:"PCR", type:"single",
+ q:"Warum wird in der PCR meist die Taq-Polymerase und nicht eine „normale“ DNA-Polymerase verwendet?",
+ opts:["Taq-Polymerase stammt aus einem thermophilen Bakterium und ist hitzestabil.","Taq-Polymerase ist nur preiswerter, hat aber sonst keine besonderen Eigenschaften.","Taq-Polymerase synthetisiert in 3'→5'-Richtung, was für die PCR nötig ist.","Taq-Polymerase kann vollständig ohne Primer mit der DNA-Synthese beginnen."],
+ correct:[0],
+ exp:"Taq-Polymerase stammt aus dem thermophilen Bakterium Thermus aquaticus und ist hitzestabil – nur deshalb überlebt sie die wiederholten Denaturierungsschritte bei ca. 95 °C, ohne selbst zu denaturieren."},
+
+{id:16, topic:"PCR", type:"single",
+ q:"Welche Funktion haben die Primer in der PCR?",
+ opts:["Sie liefern die notwendige chemische Energie für die gesamte Polymerase-Reaktion.","Sie denaturieren eigenständig die DNA-Doppelhelix vor jedem neuen Zyklus.","Sie legen Start und Ende des zu amplifizierenden Bereichs fest.","Sie übernehmen in der PCR vollständig die Funktion der Ligase."],
+ correct:[2],
+ exp:"Primer binden komplementär an die Matrize und legen so Start und Ende des amplifizierten Bereichs fest; ihr freies 3'-OH-Ende ist Voraussetzung dafür, dass die Polymerase überhaupt verlängern kann."},
+
+{id:17, topic:"PCR", type:"single",
+ q:"Aus einer einzigen DNA-Matrize entstehen pro vollständigem PCR-Zyklus theoretisch doppelt so viele Kopien des Zielbereichs wie zuvor. Wie viele Kopien liegen nach 5 vollständigen Zyklen theoretisch maximal vor?",
+ opts:["64","32","10","16"],
+ correct:[1],
+ exp:"Bei idealer Verdopplung pro Zyklus gilt 2ⁿ. Nach 5 Zyklen: 2⁵ = 32 Kopien."},
+
+{id:18, topic:"PCR", type:"single",
+ q:"Worin unterscheidet sich die PCR grundlegend von der Replikation in der Zelle?",
+ opts:["In der PCR wird ausschließlich RNA anstelle von DNA neu synthetisiert.","In der PCR werden grundsätzlich keinerlei Primer für die Synthese benötigt.","In der Zelle läuft die reguläre Replikation bei konstant etwa 95 °C ab.","In der PCR erfolgt die Denaturierung durch Hitze statt durch Enzyme wie Helicase."],
+ correct:[3],
+ exp:"In der Zelle übernehmen Enzyme (Helicase, Topoisomerase u. a.) das Entwinden; in der PCR geschieht dies durch Hitzedenaturierung. Außerdem ersetzt die PCR die komplexe zelluläre Enzymmaschinerie durch wenige definierte Komponenten (Primer, Taq-Polymerase, Nukleotide)."},
+
+{id:19, topic:"Gelelektrophorese", type:"single",
+ q:"Wonach werden DNA-Fragmente bei der Gelelektrophorese hauptsächlich aufgetrennt?",
+ opts:["Nach ihrer Größe – kleinere Fragmente wandern schneller durch das Gel.","Nach ihrer genauen Basensequenz von 5' nach 3' im gesamten Fragment.","Nach ihrem exakten prozentualen GC-Gehalt in jedem einzelnen Fragment.","Nach ihrer natürlichen Eigenfarbe unter langwelligem UV-Licht."],
+ correct:[0],
+ exp:"Das Gel wirkt wie ein molekulares Sieb: Kleinere Fragmente wandern schneller und weiter als größere, sodass die Auftrennung im Wesentlichen nach der Fragmentlänge erfolgt."},
+
+{id:20, topic:"Gelelektrophorese", type:"single",
+ q:"In welche Richtung wandern DNA-Fragmente im elektrischen Feld der Gelelektrophorese, und warum?",
+ opts:["Zur Kathode (Minuspol), da DNA aufgrund der Phosphatgruppen positiv geladen ist.","Zur Kathode, da vor allem die stickstoffhaltigen Basen negativ geladen sind.","Zur Anode (Pluspol), da DNA durch die Phosphatgruppen negativ geladen ist.","Es findet grundsätzlich keine gerichtete Wanderung im elektrischen Feld statt."],
+ correct:[2],
+ exp:"Die Phosphatgruppen im Rückgrat sind negativ geladen, daher wandert DNA im elektrischen Feld zur Anode (Pluspol)."},
+
+{id:21, topic:"Gelelektrophorese", type:"single",
+ q:"Wozu dient ein zusätzlich aufgetragener „DNA-Marker“ (Größenstandard)?",
+ opts:["Er färbt die aufgetrennte DNA im Gel sichtbar violett bis blau an.","Er beschleunigt gleichmäßig die Wanderung aller aufgetragenen Proben im Gel.","Er ersetzt vollständig die Funktion der externen Spannungsquelle.","Er enthält Fragmente bekannter Länge zum Größenvergleich mit den Proben."],
+ correct:[3],
+ exp:"Der Marker enthält Fragmente bekannter Größe und dient als Referenz, um die Länge unbekannter Fragmente anhand ihrer Laufstrecke abzuschätzen."},
+
+{id:22, topic:"Genetischer Fingerabdruck (STR)", type:"single",
+ q:"Was versteht man unter STRs (Short Tandem Repeats) im Kontext des genetischen Fingerabdrucks?",
+ opts:["Kurze, wiederholte, nicht-codierende DNA-Abschnitte mit variabler Wiederholungsanzahl.","Codierende, funktionell wichtige Genabschnitte, die bei jedem Menschen identisch sind.","Mutierte Gene auf dem Y-Chromosom, die schwere Erbkrankheiten verursachen.","Kurze RNA-Abschnitte, die ausschließlich bei der Transkription neu entstehen."],
+ correct:[0],
+ exp:"STRs sind kurze, tandemartig wiederholte, meist nicht-codierende DNA-Abschnitte. Die Anzahl der Wiederholungen ist von Person zu Person sehr unterschiedlich (hochpolymorph) – das macht sie für die Individualisierung nutzbar."},
+
+{id:23, topic:"Genetischer Fingerabdruck (STR)", type:"multi",
+ q:"Wie ist die grundsätzliche Logik der STR-Analyse beim genetischen Fingerabdruck?",
+ opts:["Jeder Mensch besitzt an jedem einzelnen STR-Locus eine einzigartige, bei niemand anderem vorkommende Wiederholungsanzahl.","Mittels PCR werden spezifische STR-Loci mit Primern, die die Wiederholungsregion flankieren, amplifiziert.","Je mehr unterschiedliche STR-Loci gleichzeitig analysiert werden, desto höher die Diskriminierungskraft.","Da Personen sich in der Anzahl der Wiederholungseinheiten unterscheiden, entstehen PCR-Produkte unterschiedlicher Länge.","Die unterschiedlich langen PCR-Produkte werden anschließend der Größe nach elektrophoretisch aufgetrennt."],
+ correct:[1,2,3,4],
+ exp:"Die Aussage zu einem einzelnen Locus ist falsch: Ein bestimmter Wiederholungswert an einem einzelnen Locus kommt bei vielen Menschen vor. Erst die Kombination mehrerer unabhängiger STR-Loci macht das Gesamtmuster praktisch individuell – deshalb erhöht jeder zusätzlich analysierte Locus die Diskriminierungskraft."},
+
+{id:24, topic:"Genetischer Fingerabdruck (STR)", type:"single",
+ q:"Bei einem Vaterschaftstest zeigt das Kind an einem STR-Locus die Werte 14 und 17. Die Mutter zeigt an diesem Locus die Werte 14 und 16. Welche Aussage ist korrekt?",
+ opts:["Der angebliche Vater muss zwingend selbst den Wert 14 besitzen, da dieser eindeutig von der Mutter stammt.","Das Allel 17 des Kindes muss vom biologischen Vater stammen, der diesen Wert folglich selbst trägt.","Da die Mutter den Wert 17 an diesem Locus nicht besitzt, kann das Kind biologisch nicht von ihr abstammen.","Die beobachteten Werte sind rein zufällig verteilt und lassen grundsätzlich keine Aussage über die Abstammung zu."],
+ correct:[1],
+ exp:"Das Kind erhält pro Locus je ein Allel von Mutter und Vater. Da 14 bei der Mutter vorkommt, stammt dieses Allel plausibel von ihr; das verbleibende Allel 17 muss dann vom biologischen Vater stammen, der diesen Wert folglich selbst besitzen muss."}
+];
+
+const TOTAL_POINTS = DATA.reduce((s,q)=> s + (q.type==='multi'?2:1), 0);
+
+function renderQuiz(){
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = DATA.map(q => {
+    const typeLabel = q.type==='multi' ? 'Mehrfachauswahl – mehrere Antworten richtig' : 'Einfachauswahl';
+    const badgeClass = q.type==='multi' ? 'badge multi' : 'badge';
+    const inputType = q.type==='multi' ? 'checkbox' : 'radio';
+    const optsHtml = q.opts.map((opt,i)=>`
+      <label class="opt" data-qid="${q.id}" data-idx="${i}">
+        <input type="${inputType}" name="q${q.id}" value="${i}">
+        <span class="opt-text">${opt}</span>
+        <span class="opt-tag"></span>
+      </label>
+    `).join('');
+    return `
+    <div class="qcard" id="qcard-${q.id}" data-qid="${q.id}">
+      <div class="lane" id="lane-${q.id}"></div>
+      <div class="qhead">
+        <span class="eyebrow">${q.topic}</span>
+        <span class="${badgeClass}">${typeLabel}</span>
+      </div>
+      <div class="qtext"><span class="qnum">${q.id}.</span> ${q.q}</div>
+      <div class="options">${optsHtml}</div>
+      <div class="explanation"><b>Erklärung:</b> ${q.exp}</div>
+    </div>`;
+  }).join('');
+
+  quiz.addEventListener('change', (e)=>{
+    const card = e.target.closest('.qcard');
+    if(!card || card.classList.contains('graded')) return;
+    const qid = card.dataset.qid;
+    const lane = document.getElementById('lane-'+qid);
+    lane.classList.add('active');
+    updateProgress();
+  });
+}
+
+function updateProgress(){
+  let answered = 0;
+  DATA.forEach(q=>{
+    const checked = document.querySelectorAll(`input[name="q${q.id}"]:checked`);
+    if(checked.length>0) answered++;
+  });
+  document.getElementById('progressFill').style.width = (answered/DATA.length*100)+'%';
+  document.getElementById('progressText').textContent = `${answered} / ${DATA.length} beantwortet`;
+}
+
+function arraysEqualAsSets(a,b){
+  if(a.length!==b.length) return false;
+  const sa=[...a].sort().join(','), sb=[...b].sort().join(',');
+  return sa===sb;
+}
+
+function percentToPoints(p){
+  if(p>=95) return 15;
+  if(p>=90) return 14;
+  if(p>=85) return 13;
+  if(p>=80) return 12;
+  if(p>=75) return 11;
+  if(p>=70) return 10;
+  if(p>=65) return 9;
+  if(p>=60) return 8;
+  if(p>=55) return 7;
+  if(p>=50) return 6;
+  if(p>=45) return 5;
+  if(p>=40) return 4;
+  if(p>=33) return 3;
+  if(p>=27) return 2;
+  if(p>=20) return 1;
+  return 0;
+}
+
+function evaluate(){
+  let earned = 0;
+  const topicTotals = {};
+  DATA.forEach(q=>{
+    if(!topicTotals[q.topic]) topicTotals[q.topic] = {earned:0, max:0};
+    const maxPts = q.type==='multi' ? 2 : 1;
+    topicTotals[q.topic].max += maxPts;
+
+    const checkedEls = [...document.querySelectorAll(`input[name="q${q.id}"]:checked`)];
+    const selected = checkedEls.map(el=>parseInt(el.value));
+    const isCorrect = arraysEqualAsSets(selected, q.correct);
+    if(isCorrect){ earned += maxPts; topicTotals[q.topic].earned += maxPts; }
+
+    const card = document.getElementById('qcard-'+q.id);
+    card.classList.add('graded');
+    const lane = document.getElementById('lane-'+q.id);
+    lane.classList.remove('active');
+    lane.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    card.querySelectorAll('.opt').forEach(optEl=>{
+      const idx = parseInt(optEl.dataset.idx);
+      const input = optEl.querySelector('input');
+      input.disabled = true;
+      const tag = optEl.querySelector('.opt-tag');
+      const isSelected = selected.includes(idx);
+      const isCorrectOpt = q.correct.includes(idx);
+      if(isCorrectOpt && isSelected){ optEl.classList.add('opt-correct'); tag.textContent='richtig ✓'; tag.classList.add('ok'); }
+      else if(isCorrectOpt && !isSelected){ optEl.classList.add('opt-missed'); tag.textContent='wäre richtig'; tag.classList.add('ok'); }
+      else if(!isCorrectOpt && isSelected){ optEl.classList.add('opt-incorrect-selected'); tag.textContent='falsch ✗'; tag.classList.add('bad'); }
+    });
+  });
+
+  const percent = Math.round((earned/TOTAL_POINTS)*100);
+  const punkte = percentToPoints(percent);
+
+  let rows = Object.entries(topicTotals).map(([topic,v])=>{
+    const pct = Math.round((v.earned/v.max)*100);
+    return `<tr><td>${topic}</td><td>${v.earned} / ${v.max}</td>
+      <td><span class="bar-bg"><span class="bar-fill" style="width:${pct}%"></span></span></td></tr>`;
+  }).join('');
+
+  const summary = document.getElementById('summary');
+  summary.innerHTML = `
+    <h2>Ergebnis</h2>
+    <div class="scoreline">${earned} / ${TOTAL_POINTS} Punkte <span>(${percent} %)</span></div>
+    <div class="note">Grobe Orientierung auf der 0–15-Punkte-Skala: <b>${punkte} Punkte</b> (ersetzt keine offizielle Bewertung).</div>
+    <table>
+      <tr><th>Themenblock</th><th>Punkte</th><th></th></tr>
+      ${rows}
+    </table>
+  `;
+  summary.classList.add('show');
+  document.getElementById('actionbar').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('evalBtn').addEventListener('click', evaluate);
+document.getElementById('resetBtn').addEventListener('click', ()=> location.reload());
+
+renderQuiz();
+updateProgress();
+</script>
+</body>
+</html>
