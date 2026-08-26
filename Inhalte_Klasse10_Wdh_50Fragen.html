@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC-Test: Zellbiologie & Enzymatik (Wiederholung Klasse 10)</title>
+<style>
+  :root{
+    --bg:#f5f7f6;
+    --card:#ffffff;
+    --ink:#1f2b27;
+    --muted:#5b6b64;
+    --accent:#2f7a5b;
+    --accent-dark:#215c43;
+    --line:#dfe6e2;
+    --correct:#2f7a5b;
+    --correct-bg:#e7f4ee;
+    --wrong:#b3432b;
+    --wrong-bg:#fbeae5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Verdana, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    padding:24px 12px 80px;
+  }
+  .sheet{
+    max-width:820px;
+    margin:0 auto;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:32px 36px 40px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
+  }
+  h1{
+    font-size:1.5rem;
+    margin:0 0 4px;
+    color:var(--accent-dark);
+  }
+  .subtitle{
+    color:var(--muted);
+    margin:0 0 20px;
+    font-size:0.95rem;
+  }
+  .meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px 32px;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:14px 0;
+    margin-bottom:22px;
+    font-size:0.92rem;
+  }
+  .meta label{
+    color:var(--muted);
+    margin-right:6px;
+  }
+  .meta input{
+    border:none;
+    border-bottom:1px solid var(--muted);
+    background:transparent;
+    font-size:0.92rem;
+    padding:2px 4px;
+    min-width:140px;
+    font-family:inherit;
+  }
+  .instructions{
+    background:#eef4f1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 18px;
+    font-size:0.92rem;
+    margin-bottom:26px;
+  }
+  .instructions strong{color:var(--accent-dark);}
+  .section-label{
+    display:inline-block;
+    font-size:0.75rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:#fff;
+    background:var(--accent);
+    padding:3px 10px;
+    border-radius:20px;
+    margin:28px 0 14px;
+  }
+  .question{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px 14px;
+    margin-bottom:14px;
+    background:#fbfcfb;
+  }
+  .question.correct-hl{border-color:var(--correct); background:var(--correct-bg);}
+  .question.wrong-hl{border-color:var(--wrong); background:var(--wrong-bg);}
+  .q-text{
+    font-weight:600;
+    margin-bottom:10px;
+    font-size:0.98rem;
+  }
+  .q-num{color:var(--accent-dark); margin-right:6px;}
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .option{
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+    padding:7px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:0.94rem;
+    border:1px solid transparent;
+  }
+  .option:hover{background:#eef4f1;}
+  .option input{margin-top:3px; flex-shrink:0;}
+  .option.is-correct-answer{border-color:var(--correct); background:var(--correct-bg); font-weight:600;}
+  .option.is-wrong-answer{border-color:var(--wrong); background:var(--wrong-bg);}
+  .points-note{
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-left:4px;
+  }
+  .footer-bar{
+    position:sticky;
+    bottom:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    padding:14px 0 4px;
+    margin-top:20px;
+  }
+  button{
+    font-family:inherit;
+    font-size:0.96rem;
+    padding:10px 22px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+  }
+  #checkBtn{background:var(--accent); color:#fff;}
+  #checkBtn:hover{background:var(--accent-dark);}
+  #resetBtn{background:transparent; color:var(--accent-dark); border:1px solid var(--accent); }
+  #resetBtn:hover{background:#eef4f1;}
+  #result{
+    font-weight:700;
+    font-size:1rem;
+  }
+  #result.good{color:var(--correct);}
+  #result.bad{color:var(--wrong);}
+  .unanswered-warning{
+    font-size:0.85rem;
+    color:var(--wrong);
+    margin-top:8px;
+  }
+  .auto-submit-status{
+    margin-top:18px;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:0.9rem;
+    font-weight:600;
+  }
+  .auto-submit-status.pending{background:#fff6e5; border:1px solid #d9a441; color:#7a5610;}
+  .auto-submit-status.ok{background:var(--correct-bg); border:1px solid var(--correct); color:var(--correct-dark, var(--accent-dark));}
+  .auto-submit-status.fail{background:var(--wrong-bg); border:1px solid var(--wrong); color:var(--wrong);}
+  .code-panel{
+    margin-top:18px;
+    padding:16px 18px;
+    background:#eef4f1;
+    border:1px solid var(--accent);
+    border-radius:8px;
+  }
+  .code-panel-title{
+    margin:0 0 4px;
+    font-weight:700;
+    color:var(--accent-dark);
+  }
+  .code-panel-hint{
+    margin:0 0 12px;
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+  .code-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  #resultCode{
+    flex:1;
+    min-width:220px;
+    font-family:"Courier New", monospace;
+    font-size:0.95rem;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+    letter-spacing:0.03em;
+  }
+  #copyCodeBtn{
+    background:var(--accent);
+    color:#fff;
+    padding:9px 18px;
+  }
+  #copyCodeBtn:hover{background:var(--accent-dark);}
+  .copy-feedback{
+    margin:8px 0 0;
+    font-size:0.85rem;
+    color:var(--accent-dark);
+    min-height:1.1em;
+  }
+  @media print{
+    body{background:#fff; padding:0;}
+    .sheet{box-shadow:none; border:none; padding:10px;}
+    .footer-bar{display:none;}
+    .code-panel{display:none;}
+    .instructions{background:#fff;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>MC-Test: Zellbiologie &amp; Enzymatik</h1>
+  <p class="subtitle">Wiederholung der Inhalte aus Klasse 10 &middot; Einstieg in die Qualifikationsphase (Klasse 11, Biologie Gymnasium)</p>
+
+  <div class="meta">
+    <div><label>Name:</label><input type="text" id="studentName"></div>
+    <div><label>Klasse:</label><input type="text" id="studentClass" style="min-width:80px;"></div>
+    <div><label>Datum:</label><input type="text" id="studentDate" style="min-width:110px;"></div>
+  </div>
+
+  <div class="instructions">
+    <strong>Hinweise:</strong> Dieser Test besteht aus 25 Multiple-Choice-Fragen zu den Themen <strong>Zellbiologie</strong> und <strong>Enzymatik</strong>. Bei jeder Frage ist genau <strong>eine</strong> Antwort richtig. Kreuze die passende Antwort an. Am Ende kannst du deine Lösung über den Button &bdquo;Auswerten&ldquo; digital überprüfen lassen.
+  </div>
+
+  <div class="section-label">Teil A &middot; Zellbiologie</div>
+  <div id="quiz"></div>
+
+  <div class="footer-bar">
+    <div style="display:flex; gap:10px;">
+      <button id="checkBtn">Auswerten</button>
+      <button id="resetBtn">Zurücksetzen</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <div id="autoSubmitStatus" class="auto-submit-status" hidden></div>
+
+  <div id="codePanel" class="code-panel" hidden>
+    <p class="code-panel-title">Ergebniscode für deine Lehrkraft</p>
+    <p class="code-panel-hint" id="codePanelHint">Bitte trage oben zuerst deinen Namen ein. Kopiere anschließend den folgenden Code und schicke ihn deiner Lehrkraft (z. B. per Chat/Mail) – oder tippe ihn ab, falls Kopieren nicht möglich ist. Groß-/Kleinschreibung ist dabei egal.</p>
+    <div class="code-row">
+      <input type="text" id="resultCode" readonly onclick="this.select();">
+      <button id="copyCodeBtn" type="button">Code kopieren</button>
+    </div>
+    <p id="copyFeedback" class="copy-feedback"></p>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// OPTIONAL: Automatische Übertragung an ein Google Sheet der Lehrkraft.
+// Standardmäßig leer -> der Test funktioniert dann genauso wie bisher, nur
+// mit dem Ergebniscode zum manuellen Kopieren/Abtippen.
+//
+// Um die automatische Übertragung zu aktivieren: Google Apps Script gemäß
+// der beiliegenden Anleitung einrichten und die dabei erzeugte "Web-App-URL"
+// (endet auf /exec) hier eintragen, z. B.:
+// const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbxUJfE3CJktL1Dlt9EZz4CHnGNh0rwMsf9IwCfo1DxL_RMu9D9is069IvvKamAc1JWU3A/exec";
+// ============================================================================
+const SUBMIT_URL = "";
+
+// Jede Frage: text, options (Array von Strings), correct (Index in options VOR dem Mischen)
+const rawQuestions = [
+  // ---------- ZELLBIOLOGIE ----------
+  {
+    text: "Welches Zellorganell ist der Ort der Fotosynthese?",
+    options: [
+      "Mitochondrium",
+      "Chloroplast",
+      "Golgi-Apparat",
+      "Ribosom"
+    ],
+    correct: 1
+  },
+  {
+    text: "In welchem Zellorganell findet der größte Teil der Zellatmung statt, bei der ATP gewonnen wird?",
+    options: [
+      "Mitochondrium",
+      "Endoplasmatisches Retikulum",
+      "Zellkern",
+      "Golgi-Apparat"
+    ],
+    correct: 0
+  },
+  {
+    text: "Welche Aufgabe hat der Zellkern?",
+    options: [
+      "Abbau von Zellbestandteilen und Recycling von Bausteinen",
+      "Speicherung der Erbinformation und Steuerung der Zelle",
+      "Herstellung und Verpackung von Proteinen für den Export",
+      "Aufnahme von Wasser zur Regulierung des Zelldrucks"
+    ],
+    correct: 1
+  },
+  {
+    text: "Was unterscheidet eine eukaryotische von einer prokaryotischen Zelle grundlegend?",
+    options: [
+      "Nur Prokaryoten verfügen über eine echte Zellmembran",
+      "Prokaryoten besitzen stets eine Zellwand, Eukaryoten nie",
+      "Eukaryoten sind im Durchschnitt kleiner als Prokaryoten",
+      "Eukaryoten besitzen einen Zellkern, Prokaryoten nicht"
+    ],
+    correct: 3
+  },
+  {
+    text: "Welche der folgenden Strukturen kommt NUR in Pflanzenzellen, nicht aber in tierischen Zellen vor?",
+    options: [
+      "Zellwand aus Cellulose",
+      "Mitochondrien mit Doppelmembran",
+      "Zellmembran aus Phospholipiden",
+      "Ribosomen frei im Cytoplasma"
+    ],
+    correct: 0
+  },
+  {
+    text: "Wie wird der grundlegende Aufbau der Zellmembran bezeichnet?",
+    options: [
+      "Kristallgittermodell",
+      "Fluid-Mosaik-Modell",
+      "Doppelhelix-Modell",
+      "Einschichtmodell"
+    ],
+    correct: 1
+  },
+  {
+    text: "Welche Funktion hat das raue endoplasmatische Retikulum?",
+    options: [
+      "Speicherung und Aufbau von Lipiden in der Zelle",
+      "Synthese und Weiterleitung neu gebildeter Proteine",
+      "Abbau von Zellbestandteilen durch Enzyme",
+      "Speicherung von Calcium-Ionen und Wasser"
+    ],
+    correct: 1
+  },
+  {
+    text: "Welche Aufgabe erfüllt der Golgi-Apparat in der Zelle?",
+    options: [
+      "Aufbau von Traubenzucker durch Fotosynthese",
+      "Modifikation und Verpackung von Proteinen",
+      "Gewinnung von Energie durch Zellatmung",
+      "Verdopplung der DNA vor der Teilung"
+    ],
+    correct: 1
+  },
+  {
+    text: "Wofür sind Ribosomen zuständig?",
+    options: [
+      "Proteinbiosynthese",
+      "Zellatmung",
+      "Zellteilung",
+      "Wasserhaushalt"
+    ],
+    correct: 0
+  },
+  {
+    text: "Welche Funktion besitzen Lysosomen?",
+    options: [
+      "Speicherung der genetischen Information",
+      "Abbau von Stoffen mittels spezialisierter Enzyme",
+      "Bereitstellung von Bauplänen für Proteine",
+      "Aufbau von Zucker aus CO2 und Wasser"
+    ],
+    correct: 1
+  },
+  {
+    text: "Was versteht man unter Diffusion?",
+    options: [
+      "Gerichteter Transport von Teilchen unter ATP-Verbrauch",
+      "Aufnahme großer Partikel durch Einstülpung der Membran",
+      "Ungerichteter Ausgleich eines Konzentrationsgefälles",
+      "Abgabe von Stoffen aus der Zelle mittels Vesikeln"
+    ],
+    correct: 2
+  },
+  {
+    text: "Was beschreibt der Begriff Osmose?",
+    options: [
+      "Diffusion von Wasser durch eine Membran",
+      "Aufnahme fester Nahrungspartikel in die Zelle",
+      "Transport von Ionen unter Verbrauch von Energie",
+      "Teilung einer Zelle in zwei Tochterzellen"
+    ],
+    correct: 0
+  },
+  {
+    text: "Was kennzeichnet den aktiven Transport durch eine Zellmembran?",
+    options: [
+      "Transport ausschließlich entlang des Gefälles",
+      "Transport ganz ohne jeglichen Energieaufwand",
+      "Transport mittels ATP-Verbrauch",
+      "Transport, der nur bei Wasser auftritt"
+    ],
+    correct: 2
+  },
+  {
+    text: "Wodurch unterscheiden sich Endozytose und Exozytose?",
+    options: [
+      "Beide Prozesse treten nur bei Pflanzen auf",
+      "Aufnahme durch Einstülpung, Abgabe per Vesikelfusion",
+      "Beide Vorgänge laufen ohne Membranbeteiligung ab",
+      "Beide Begriffe meinen exakt denselben Vorgang"
+    ],
+    correct: 1
+  },
+
+  // ---------- ENZYMATIK ----------
+  {
+    text: "Wie lässt sich ein Enzym allgemein beschreiben?",
+    options: [
+      "Anorganisches Salz mit katalytischer Wirkung",
+      "Biokatalysator, der Reaktionen beschleunigt",
+      "Speicherstoff für Energie in Form von Fett",
+      "Baustein der pflanzlichen Zellwand"
+    ],
+    correct: 1
+  },
+  {
+    text: "Was besagt das Schlüssel-Schloss-Prinzip?",
+    options: [
+      "Substrat passt genau ins aktive Zentrum",
+      "Substrate verändern bei Reaktion nie ihre Form",
+      "Enzyme reagieren beliebig mit jedem Substrat",
+      "Enzyme wirken nur in stark saurem Milieu"
+    ],
+    correct: 0
+  },
+  {
+    text: "Welchen Effekt haben Enzyme auf die Aktivierungsenergie einer Reaktion?",
+    options: [
+      "Enzyme erhöhen die Aktivierungsenergie deutlich",
+      "Enzyme haben keinerlei Einfluss auf die Energie",
+      "Enzyme senken die Aktivierungsenergie",
+      "Enzyme verändern nur die entstehenden Produkte"
+    ],
+    correct: 2
+  },
+  {
+    text: "Was bedeutet Substratspezifität eines Enzyms?",
+    options: [
+      "Ein Enzym katalysiert grundsätzlich jede Reaktion",
+      "Ein Enzym setzt nur ein bestimmtes Substrat um",
+      "Ein Enzym wird bei jeder Reaktion selbst verbraucht",
+      "Ein Enzym kann ausschließlich bei 37°C arbeiten"
+    ],
+    correct: 1
+  },
+  {
+    text: "Was versteht man unter der Wirkungsspezifität eines Enzyms?",
+    options: [
+      "Ein Enzym katalysiert stets nur eine Reaktionsart",
+      "Ein Enzym wirkt nur bei sehr niedrigen Temperaturen",
+      "Ein Enzym verändert seine Struktur bei jeder Reaktion",
+      "Ein Enzym braucht für jede Reaktion ein Coenzym"
+    ],
+    correct: 0
+  },
+  {
+    text: "Was passiert in der Regel, wenn die Temperatur über das Temperaturoptimum eines Enzyms ansteigt?",
+    options: [
+      "Die Geschwindigkeit steigt dabei unbegrenzt weiter",
+      "Es verändert sich an der Aktivität grundsätzlich nichts",
+      "Die Aktivität sinkt, da das Enzym denaturiert",
+      "Das Enzym wird dadurch spezifischer für sein Substrat"
+    ],
+    correct: 2
+  },
+  {
+    text: "Was bezeichnet man als Denaturierung eines Enzyms?",
+    options: [
+      "Zerstörung der Raumstruktur eines Proteins",
+      "Aufnahme eines weiteren Substrats ins aktive Zentrum",
+      "Normaler, unveränderter Ablauf der Katalyse",
+      "Vermehrung von Enzymmolekülen innerhalb der Zelle"
+    ],
+    correct: 0
+  },
+  {
+    text: "Wie wirkt sich ein stark von seinem Optimum abweichender pH-Wert meist auf ein Enzym aus?",
+    options: [
+      "Der pH-Wert hat grundsätzlich keinen Einfluss",
+      "Ein abweichender pH-Wert beschleunigt stets die Reaktion",
+      "Die Aktivität sinkt durch Formänderung des Zentrums",
+      "Der pH-Wert verändert lediglich die Farbe des Enzyms"
+    ],
+    correct: 2
+  },
+  {
+    text: "Wie wirkt ein kompetitiver Hemmstoff auf ein Enzym?",
+    options: [
+      "Der Hemmstoff bindet an einer vom Zentrum entfernten Stelle",
+      "Der Hemmstoff ähnelt dem Substrat und blockiert dadurch das Zentrum",
+      "Der Hemmstoff zerstört dabei das Enzym vollständig irreversibel",
+      "Der Hemmstoff erhöht durch seine Bindung die Substratmenge"
+    ],
+    correct: 1
+  },
+  {
+    text: "Was ist charakteristisch für eine nicht-kompetitive (allosterische) Hemmung?",
+    options: [
+      "Der Hemmstoff bindet andernorts und verformt das Zentrum",
+      "Der Hemmstoff besitzt exakt dieselbe Form wie das Substrat",
+      "Diese Hemmung tritt nur bei sehr niedrigen Temperaturen auf",
+      "Diese Hemmung lässt sich durch mehr Substrat aufheben"
+    ],
+    correct: 0
+  },
+  {
+    text: "Was sind Kofaktoren bzw. Coenzyme?",
+    options: [
+      "Abbauprodukte, die nach der Reaktion entstehen",
+      "Nicht-proteinogene Hilfsstoffe für manche Enzyme",
+      "Andere Bezeichnung für das umgesetzte Substrat",
+      "Bestandteile, aus denen die Membran aufgebaut ist"
+    ],
+    correct: 1
+  }
+];
+
+// Fisher-Yates Shuffle
+function shuffle(array){
+  const arr = array.slice();
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const quizEl = document.getElementById('quiz');
+const sectionBreakAfterIndex = 13; // nach Frage 14 (Index 13) kommt Teil B
+
+const preparedQuestions = rawQuestions.map((q) => {
+  const optionObjs = q.options.map((text, idx) => ({ text, isCorrect: idx === q.correct }));
+  return { text: q.text, options: shuffle(optionObjs) };
+});
+
+preparedQuestions.forEach((q, qi) => {
+  if(qi === sectionBreakAfterIndex){
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = 'Teil B · Enzymatik';
+    quizEl.appendChild(label);
+  }
+
+  const qDiv = document.createElement('div');
+  qDiv.className = 'question';
+  qDiv.dataset.index = qi;
+
+  const qText = document.createElement('div');
+  qText.className = 'q-text';
+  qText.innerHTML = `<span class="q-num">${qi + 1}.</span>${q.text}`;
+  qDiv.appendChild(qText);
+
+  const optsDiv = document.createElement('div');
+  optsDiv.className = 'options';
+
+  q.options.forEach((opt, oi) => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.dataset.correct = opt.isCorrect ? '1' : '0';
+
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = `q${qi}`;
+    input.value = oi;
+
+    const span = document.createElement('span');
+    span.textContent = opt.text;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    optsDiv.appendChild(label);
+  });
+
+  qDiv.appendChild(optsDiv);
+  quizEl.appendChild(qDiv);
+});
+
+// ---------- Ergebniscode: läuft komplett lokal im Browser, ohne Server/Konto/Upload ----------
+const B32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; // RFC4648, keine 0/1/8/9 -> vermeidet Verwechslungen beim Abtippen
+
+function base32Encode(bytes){
+  let bits = 0, value = 0, output = '';
+  for(let i = 0; i < bytes.length; i++){
+    value = (value << 8) | bytes[i];
+    bits += 8;
+    while(bits >= 5){
+      output += B32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if(bits > 0){
+    output += B32_ALPHABET[(value << (5 - bits)) & 31];
+  }
+  return output;
+}
+
+function buildResultCode(displayName, total, correctBits){
+  const nameBytes = Array.from(new TextEncoder().encode(displayName || 'Ohne Namen')).slice(0, 60);
+
+  // Bitmaske: 1 = richtig beantwortet, 0 = falsch/nicht beantwortet
+  const maskByteCount = Math.ceil(total / 8);
+  const maskBytes = new Array(maskByteCount).fill(0);
+  correctBits.forEach((bit, i) => {
+    if(bit){
+      maskBytes[Math.floor(i / 8)] |= (1 << (i % 8));
+    }
+  });
+
+  const scoreCount = correctBits.reduce((a, b) => a + b, 0);
+
+  const payloadNoChecksum = [
+    1,                    // Version
+    total & 0xFF,         // Anzahl Fragen
+    scoreCount & 0xFF,    // Punktzahl
+    nameBytes.length & 0xFF,
+    ...nameBytes,
+    ...maskBytes
+  ];
+
+  let checksum = 0;
+  payloadNoChecksum.forEach(b => { checksum = (checksum + b) % 256; });
+
+  const payload = new Uint8Array([...payloadNoChecksum, checksum]);
+  return 'BIO25-' + base32Encode(payload);
+}
+
+// Optionale automatische Übertragung (siehe SUBMIT_URL oben). "no-cors" wird
+// bewusst verwendet, damit die Anfrage nicht an CORS-Beschränkungen scheitert;
+// dadurch kann der Übertragungserfolg im Browser aber nicht sicher geprüft
+// werden – der Ergebniscode bleibt deshalb immer zusätzlich als Sicherung sichtbar.
+async function submitToServer(name, klasse, score, total, bits){
+  if(!SUBMIT_URL) return { attempted: false };
+  try{
+    await fetch(SUBMIT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ name, klasse, score, total, bits })
+    });
+    return { attempted: true, ok: true };
+  } catch(e){
+    return { attempted: true, ok: false, error: String(e) };
+  }
+}
+
+document.getElementById('checkBtn').addEventListener('click', () => {
+  let correctCount = 0;
+  let unanswered = 0;
+  const total = preparedQuestions.length;
+  const correctBits = [];
+
+  document.querySelectorAll('.question').forEach((qDiv) => {
+    const idx = qDiv.dataset.index;
+    const options = qDiv.querySelectorAll('.option');
+    const checked = qDiv.querySelector(`input[name="q${idx}"]:checked`);
+
+    qDiv.classList.remove('correct-hl', 'wrong-hl');
+    options.forEach(o => o.classList.remove('is-correct-answer', 'is-wrong-answer'));
+
+    if(!checked){
+      unanswered++;
+      correctBits.push(0);
+      options.forEach(o => { if(o.dataset.correct === '1') o.classList.add('is-correct-answer'); });
+      return;
+    }
+
+    const chosenOption = checked.closest('.option');
+    const wasCorrect = chosenOption.dataset.correct === '1';
+    correctBits.push(wasCorrect ? 1 : 0);
+
+    if(wasCorrect){
+      correctCount++;
+      qDiv.classList.add('correct-hl');
+      chosenOption.classList.add('is-correct-answer');
+    } else {
+      qDiv.classList.add('wrong-hl');
+      chosenOption.classList.add('is-wrong-answer');
+      options.forEach(o => { if(o.dataset.correct === '1') o.classList.add('is-correct-answer'); });
+    }
+  });
+
+  const resultEl = document.getElementById('result');
+  const percent = Math.round((correctCount / total) * 100);
+  resultEl.textContent = `${correctCount} / ${total} richtig (${percent}%)`;
+  resultEl.className = percent >= 50 ? 'good' : 'bad';
+
+  if(unanswered > 0){
+    resultEl.textContent += ` – ${unanswered} Frage(n) nicht beantwortet`;
+  }
+
+  const nameVal = document.getElementById('studentName').value.trim();
+  const classVal = document.getElementById('studentClass').value.trim();
+  const displayName = nameVal ? (classVal ? `${nameVal} (${classVal})` : nameVal) : '';
+
+  const codePanel = document.getElementById('codePanel');
+  const codeInput = document.getElementById('resultCode');
+  const copyFeedback = document.getElementById('copyFeedback');
+  const autoStatus = document.getElementById('autoSubmitStatus');
+  copyFeedback.textContent = '';
+
+  if(!nameVal){
+    codePanel.hidden = false;
+    codeInput.value = '';
+    copyFeedback.textContent = 'Bitte trage oben zuerst deinen Namen ein und klicke dann erneut auf „Auswerten“, um deinen Ergebniscode zu erhalten.';
+    codeInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
+  const code = buildResultCode(displayName, total, correctBits);
+  codeInput.value = code;
+  codePanel.hidden = false;
+
+  if(SUBMIT_URL){
+    autoStatus.hidden = false;
+    autoStatus.className = 'auto-submit-status pending';
+    autoStatus.textContent = 'Ergebnis wird automatisch übermittelt …';
+
+    submitToServer(nameVal, classVal, correctCount, total, correctBits).then(res => {
+      if(res.ok){
+        autoStatus.className = 'auto-submit-status ok';
+        autoStatus.textContent = '✅ Ergebnis wurde automatisch gesendet. Der Erfolg lässt sich technisch nicht zu 100 % bestätigen – bitte den Code unten trotzdem sicherheitshalber bereithalten.';
+      } else {
+        autoStatus.className = 'auto-submit-status fail';
+        autoStatus.textContent = '⚠️ Automatische Übermittlung fehlgeschlagen (kein Internet o. Ä.). Bitte stattdessen den Code unten an deine Lehrkraft senden.';
+      }
+    });
+  } else {
+    autoStatus.hidden = true;
+  }
+
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+  const codeInput = document.getElementById('resultCode');
+  const copyFeedback = document.getElementById('copyFeedback');
+  codeInput.select();
+
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(codeInput.value);
+      copyFeedback.textContent = 'Code kopiert! Du kannst ihn jetzt einfügen (Strg+V bzw. Cmd+V).';
+      return;
+    }
+    throw new Error('Clipboard API nicht verfügbar');
+  } catch(e){
+    try{
+      document.execCommand('copy');
+      copyFeedback.textContent = 'Code kopiert! Du kannst ihn jetzt einfügen (Strg+V bzw. Cmd+V).';
+    } catch(e2){
+      copyFeedback.textContent = 'Automatisches Kopieren nicht möglich – der Code ist markiert, bitte manuell mit Strg+C (bzw. Cmd+C) kopieren.';
+    }
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.question').forEach((qDiv) => {
+    qDiv.classList.remove('correct-hl', 'wrong-hl');
+    qDiv.querySelectorAll('.option').forEach(o => o.classList.remove('is-correct-answer', 'is-wrong-answer'));
+  });
+  document.getElementById('result').textContent = '';
+  document.getElementById('result').className = '';
+  document.getElementById('codePanel').hidden = true;
+  document.getElementById('resultCode').value = '';
+  document.getElementById('copyFeedback').textContent = '';
+  document.getElementById('autoSubmitStatus').hidden = true;
+});
+</script>
+</body>
+</html>
