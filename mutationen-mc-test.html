@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mutationen – Multiple-Choice-Test</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --text: #1f2328;
+    --muted: #5b6169;
+    --border: #dfe2e5;
+    --accent: #2f6f4f;
+    --accent-light: #e6f2ec;
+    --wrong: #b3403a;
+    --wrong-light: #fbeceb;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    padding: 2rem 1rem 4rem;
+  }
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  header {
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 0.4rem;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+  .fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+  }
+  .fields label { color: var(--muted); }
+  .fields input {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    font: inherit;
+    padding: 2px 4px;
+    width: 160px;
+  }
+  .hint {
+    background: var(--accent-light);
+    border: 1px solid #c9e2d3;
+    border-radius: var(--radius);
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  .question {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .question p.q {
+    font-weight: 600;
+    margin: 0 0 0.7rem;
+  }
+  .options { display: flex; flex-direction: column; gap: 0.5rem; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .option:hover { background: #f2f3f2; }
+  .option input { margin-top: 3px; }
+  .option.correct { background: var(--accent-light); }
+  .option.incorrect { background: var(--wrong-light); }
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+    padding: 1px 8px;
+    border-radius: 999px;
+  }
+  .badge.correct-badge { background: var(--accent); color: #fff; }
+  .badge.incorrect-badge { background: var(--wrong); color: #fff; }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    padding: 1rem 0 0.5rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: 0.65rem 1.3rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  #check-btn { background: var(--accent); color: #fff; }
+  #check-btn:hover { background: #275e42; }
+  #reset-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  #reset-btn:hover { background: #eee; }
+
+  #result {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  #result.pass { color: var(--accent); }
+  #result.fail { color: var(--wrong); }
+
+  footer {
+    margin-top: 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --card: #1d2025;
+      --text: #eaecef;
+      --muted: #9aa2ab;
+      --border: #2c3037;
+      --accent: #5fbf8b;
+      --accent-light: #17362a;
+      --wrong: #e07a74;
+      --wrong-light: #3a2222;
+    }
+    .fields input { color: var(--text); }
+    .option:hover { background: #242830; }
+    #reset-btn:hover { background: #242830; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mutationen – Multiple-Choice-Test</h1>
+    <div class="meta">Biologie · 20 Fragen · pro Frage ist genau eine Antwort richtig</div>
+  </header>
+
+  <div class="fields">
+    <div><label>Name: </label><input type="text"></div>
+    <div><label>Klasse: </label><input type="text" style="width:80px;"></div>
+    <div><label>Datum: </label><input type="text" style="width:120px;"></div>
+  </div>
+
+  <div class="hint">Beantworte alle Fragen und klicke danach auf <strong>„Auswertung anzeigen“</strong>, um deine Punktzahl und die richtigen Antworten zu sehen.</div>
+
+  <form id="quiz"></form>
+
+  <div class="actions">
+    <button type="button" id="check-btn">Auswertung anzeigen</button>
+    <button type="button" id="reset-btn">Zurücksetzen</button>
+    <span id="result"></span>
+  </div>
+
+  <footer>Erstellt auf Basis der Zusammenfassung „Was ist eine Mutation?“</footer>
+</div>
+
+<script>
+const questions = [
+  { q: "Was versteht man unter einer Mutation?", options: ["Eine geplante Veränderung des Erbguts durch den Organismus selbst","Eine zufällige, spontane Veränderung des Erbguts","Eine ausschließlich schädliche Veränderung der DNA","Eine Veränderung, die nur bei Bakterien vorkommt"], correct: 1 },
+  { q: "Bei einem einzelligen Organismus mutiert das Erbgut. Was passiert mit der Mutation?", options: ["Sie wird bei der nächsten Zellteilung automatisch repariert","Sie betrifft nur somatische Zellen","Sie wird an die Tochterzellen weitervererbt","Sie kann nicht weitervererbt werden, da Einzeller sich nicht fortpflanzen"], correct: 2 },
+  { q: "Welche Aussage zu somatischen Mutationen bei Mehrzellern trifft zu?", options: ["Sie betreffen Körperzellen und werden nicht an Nachkommen weitergegeben","Sie betreffen ausschließlich die Keimzellen","Sie werden immer an die nächste Generation vererbt","Sie kommen nur bei Pflanzen vor"], correct: 0 },
+  { q: "Warum haben Mutationen in Keimzellen eine besondere Bedeutung?", options: ["Sie treten häufiger auf als somatische Mutationen","Nur sie können an die Nachkommen weitervererbt werden","Sie sind immer vorteilhaft für die Fitness","Sie betreffen ausschließlich das Y-Chromosom"], correct: 1 },
+  { q: "Welcher Mutationstyp ist bei den Genmutationen der häufigste?", options: ["Deletion","Insertion","Punktmutation","Genommutation"], correct: 2 },
+  { q: "Was ist im strengen Sinne eine Punktmutation?", options: ["Eine Substitution einer einzelnen Base","Der Verlust mehrerer Basen","Das Einfügen zusätzlicher Basen","Eine Verdopplung eines ganzen Chromosoms"], correct: 0 },
+  { q: "Was bleibt bei einer echten Punktmutation (Substitution) gleich?", options: ["Die Aminosäuresequenz","Die Gesamtzahl der Basen","Die Proteinstruktur","Die Position des Gens"], correct: 1 },
+  { q: "Wie nennt man das Einfügen zusätzlicher Basen in die DNA-Sequenz?", options: ["Deletion","Substitution","Insertion","Translokation"], correct: 2 },
+  { q: "Wie nennt man den Verlust einer oder mehrerer Basen?", options: ["Insertion","Deletion","Substitution","Duplikation"], correct: 1 },
+  { q: "Warum zählt man Insertionen und Deletionen manchmal zu den Punktmutationen, obwohl sie es streng genommen nicht sind?", options: ["Weil sie ebenfalls durch Strahlung verursacht werden","Weil sie ausschließlich in Keimzellen auftreten","Weil manchmal nur eine einzelne Base betroffen ist","Weil sie nie eine Leserasterverschiebung verursachen"], correct: 2 },
+  { q: "Was versteht man unter einer Frameshift-Mutation?", options: ["Eine Veränderung, die immer stumm bleibt","Eine Leserasterverschiebung durch Insertion oder Deletion","Eine Mutation, die ausschließlich das Startcodon betrifft","Eine Substitution ohne Auswirkung auf das Protein"], correct: 1 },
+  { q: "Warum führen Insertionen und Deletionen häufig zu einer Leserasterverschiebung, eine Substitution jedoch nicht?", options: ["Weil sich durch Ein- oder Ausbau von Basen die Einteilung der nachfolgenden Basentripletts verschiebt, während bei einer Substitution die Basenzahl gleich bleibt","Weil Substitutionen immer in nicht-codierenden Bereichen stattfinden","Weil Insertionen und Deletionen nur in Keimzellen vorkommen","Weil bei Substitutionen automatisch ein Stopp-Codon entsteht"], correct: 0 },
+  { q: "Eine Punktmutation verändert ein Codon, es wird aufgrund der Degeneration des genetischen Codes aber weiterhin dieselbe Aminosäure eingebaut. Wie wird diese Mutation bezeichnet?", options: ["Nonsense-Mutation","Missense-Mutation","Stumme Mutation","Frameshift-Mutation"], correct: 2 },
+  { q: "Eine Mutation führt zum Einbau einer anderen Aminosäure und verändert dadurch die Proteinstruktur. Um welchen Mutationstyp handelt es sich?", options: ["Stumme Mutation","Missense-Mutation","Nonsense-Mutation","Genommutation"], correct: 1 },
+  { q: "Eine Mutation erzeugt vorzeitig ein Stopp-Codon, sodass die Proteinsynthese abgebrochen wird. Wie nennt man diese Mutation?", options: ["Stumme Mutation","Missense-Mutation","Nonsense-Mutation","Chromosomenmutation"], correct: 2 },
+  { q: "Ein Chromosomenabschnitt ist verkürzt oder verlängert. Um welche Mutationsebene handelt es sich?", options: ["Genmutation","Chromosomenmutation","Genommutation","Punktmutation"], correct: 1 },
+  { q: "Trisomie 21 ist ein klassisches Beispiel für welche Mutationsebene?", options: ["Genmutation","Chromosomenmutation","Genommutation","Punktmutation"], correct: 2 },
+  { q: "Welche der folgenden Faktoren können die Häufigkeit von Mutationen erhöhen?", options: ["Ausschließlich UV-Licht","Hochenergetische Strahlung und mutagene Stoffe wie Nitrosamine","Ausschließlich hohe Umgebungstemperaturen","Ausschließlich der natürliche Alterungsprozess der Zelle"], correct: 1 },
+  { q: "Welche Aussage zur Bewertung von Mutationen ist korrekt?", options: ["Mutationen sind grundsätzlich schädlich für den Organismus","Mutationen sind grundsätzlich vorteilhaft, da sie Evolution ermöglichen","Mutationen sind isoliert betrachtet weder „gut“ noch „schlecht“; die meisten sind neutral oder nachteilig","Mutationen wirken sich nur bei Bakterien auf die Fitness aus"], correct: 2 },
+  { q: "Wie hängt die Generationsdauer eines Organismus mit der Auswirkung von Mutationen zusammen?", options: ["Je länger die Generationsdauer, desto schneller wirken sich Mutationen aus","Je kürzer die Generationsdauer, desto schneller wirken sich Mutationen aus","Die Generationsdauer hat keinen Einfluss auf die Wirkung von Mutationen","Nur bei mehrzelligen Organismen spielt die Generationsdauer eine Rolle"], correct: 1 }
+];
+
+const letters = ["A", "B", "C", "D"];
+const form = document.getElementById("quiz");
+
+questions.forEach((item, qi) => {
+  const qDiv = document.createElement("div");
+  qDiv.className = "question";
+
+  const p = document.createElement("p");
+  p.className = "q";
+  p.textContent = `${qi + 1}. ${item.q}`;
+  qDiv.appendChild(p);
+
+  const optsDiv = document.createElement("div");
+  optsDiv.className = "options";
+
+  item.options.forEach((opt, oi) => {
+    const label = document.createElement("label");
+    label.className = "option";
+    label.id = `opt-${qi}-${oi}`;
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = `q${qi}`;
+    input.value = oi;
+
+    const span = document.createElement("span");
+    span.textContent = `${letters[oi]}) ${opt}`;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    optsDiv.appendChild(label);
+  });
+
+  qDiv.appendChild(optsDiv);
+  form.appendChild(qDiv);
+});
+
+document.getElementById("check-btn").addEventListener("click", () => {
+  let score = 0;
+  questions.forEach((item, qi) => {
+    const selected = form.querySelector(`input[name="q${qi}"]:checked`);
+    const selectedVal = selected ? parseInt(selected.value, 10) : null;
+
+    item.options.forEach((_, oi) => {
+      const label = document.getElementById(`opt-${qi}-${oi}`);
+      label.classList.remove("correct", "incorrect");
+      const oldBadge = label.querySelector(".badge");
+      if (oldBadge) oldBadge.remove();
+    });
+
+    const correctLabel = document.getElementById(`opt-${qi}-${item.correct}`);
+    correctLabel.classList.add("correct");
+    const badgeOk = document.createElement("span");
+    badgeOk.className = "badge correct-badge";
+    badgeOk.textContent = "richtig";
+    correctLabel.appendChild(badgeOk);
+
+    if (selectedVal === item.correct) {
+      score++;
+    } else if (selectedVal !== null) {
+      const wrongLabel = document.getElementById(`opt-${qi}-${selectedVal}`);
+      wrongLabel.classList.add("incorrect");
+      const badgeWrong = document.createElement("span");
+      badgeWrong.className = "badge incorrect-badge";
+      badgeWrong.textContent = "deine Antwort";
+      wrongLabel.appendChild(badgeWrong);
+    }
+  });
+
+  const result = document.getElementById("result");
+  const pct = Math.round((score / questions.length) * 100);
+  result.textContent = `${score} / ${questions.length} Punkte (${pct} %)`;
+  result.className = score >= questions.length * 0.5 ? "pass" : "fail";
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  form.reset();
+  document.querySelectorAll(".option").forEach(el => {
+    el.classList.remove("correct", "incorrect");
+    const b = el.querySelector(".badge");
+    if (b) b.remove();
+  });
+  document.getElementById("result").textContent = "";
+});
+</script>
+</body>
+</html>
