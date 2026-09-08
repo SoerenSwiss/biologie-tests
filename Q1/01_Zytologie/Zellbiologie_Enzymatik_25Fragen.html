@@ -667,6 +667,30 @@ async function submitToServer(name, klasse, score, total, bits){
   }
 }
 
+// ---------- Anonyme Klassen-Auswertung (neu, unabhängig vom Code-Fallback oben) ----------
+const RESULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby8x0FGzAFkhU52oOclOp5bjJ9KcYyT_Od0Br0Pj_U531KB6T2MMRBaoazxCbroERGD/exec";
+const TEST_NAME = "Zellbiologie & Enzymatik";
+
+function sendAnonymesErgebnis(punkte, maxPunkte, prozent){
+  if (!RESULT_ENDPOINT) return;
+  try {
+    const payload = {
+      test: TEST_NAME,
+      klasse: document.getElementById("studentClass").value || "",
+      punkte: punkte,
+      maxPunkte: maxPunkte,
+      prozent: prozent,
+      themenbloecke: ""
+    };
+    fetch(RESULT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(() => { /* stiller Fehlschlag - Selbstauswertung bleibt unberührt */ });
+  } catch (e) { /* stiller Fehlschlag */ }
+}
+
 document.getElementById('checkBtn').addEventListener('click', () => {
   let correctCount = 0;
   let unanswered = 0;
@@ -707,6 +731,7 @@ document.getElementById('checkBtn').addEventListener('click', () => {
   const percent = Math.round((correctCount / total) * 100);
   resultEl.textContent = `${correctCount} / ${total} richtig (${percent}%)`;
   resultEl.className = percent >= 50 ? 'good' : 'bad';
+  sendAnonymesErgebnis(correctCount, total, percent);
 
   if(unanswered > 0){
     resultEl.textContent += ` – ${unanswered} Frage(n) nicht beantwortet`;
