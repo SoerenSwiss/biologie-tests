@@ -195,6 +195,7 @@
   <header>
     <h1>DNA als Erbsubstanz – Replikation, PCR &amp; genetischer Fingerabdruck</h1>
     <p class="sub">Test für den Biologie-Leistungskurs · selbstauswertend, läuft komplett offline auf dem iPad</p>
+    <p class="sub">Klasse: <input type="text" id="f-klasse" style="width:100px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;"></p>
   </header>
 
   <div class="infobox">
@@ -444,6 +445,32 @@ function percentToPoints(p){
   return 0;
 }
 
+const RESULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby8x0FGzAFkhU52oOclOp5bjJ9KcYyT_Od0Br0Pj_U531KB6T2MMRBaoazxCbroERGD/exec";
+const TEST_NAME = "DNA-Replikation, PCR & genetischer Fingerabdruck";
+
+function sendAnonymesErgebnis(punkte, maxPunkte, prozent, topicTotals){
+  if (!RESULT_ENDPOINT) return;
+  try {
+    const themenbloecke = Object.entries(topicTotals)
+      .map(([topic, v]) => `${topic}: ${v.earned}/${v.max}`)
+      .join("; ");
+    const payload = {
+      test: TEST_NAME,
+      klasse: document.getElementById("f-klasse").value || "",
+      punkte: punkte,
+      maxPunkte: maxPunkte,
+      prozent: prozent,
+      themenbloecke: themenbloecke
+    };
+    fetch(RESULT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(() => { /* stiller Fehlschlag - Selbstauswertung bleibt unberührt */ });
+  } catch (e) { /* stiller Fehlschlag */ }
+}
+
 function evaluate(){
   let earned = 0;
   const topicTotals = {};
@@ -478,6 +505,7 @@ function evaluate(){
 
   const percent = Math.round((earned/TOTAL_POINTS)*100);
   const punkte = percentToPoints(percent);
+  sendAnonymesErgebnis(earned, TOTAL_POINTS, percent, topicTotals);
 
   let rows = Object.entries(topicTotals).map(([topic,v])=>{
     const pct = Math.round((v.earned/v.max)*100);
