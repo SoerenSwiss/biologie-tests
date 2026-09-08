@@ -168,7 +168,7 @@
 
   <div class="fields">
     <div><label>Name: </label><input type="text"></div>
-    <div><label>Klasse: </label><input type="text" style="width:80px;"></div>
+    <div><label>Klasse: </label><input type="text" id="f-klasse" style="width:80px;"></div>
     <div><label>Datum: </label><input type="text" style="width:120px;"></div>
   </div>
 
@@ -246,6 +246,29 @@ questions.forEach((item, qi) => {
   form.appendChild(qDiv);
 });
 
+const RESULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby8x0FGzAFkhU52oOclOp5bjJ9KcYyT_Od0Br0Pj_U531KB6T2MMRBaoazxCbroERGD/exec";
+const TEST_NAME = "Mutationen";
+
+function sendAnonymesErgebnis(punkte, maxPunkte, prozent){
+  if (!RESULT_ENDPOINT) return;
+  try {
+    const payload = {
+      test: TEST_NAME,
+      klasse: document.getElementById("f-klasse").value || "",
+      punkte: punkte,
+      maxPunkte: maxPunkte,
+      prozent: prozent,
+      themenbloecke: ""
+    };
+    fetch(RESULT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(() => { /* stiller Fehlschlag - Selbstauswertung bleibt unberührt */ });
+  } catch (e) { /* stiller Fehlschlag */ }
+}
+
 document.getElementById("check-btn").addEventListener("click", () => {
   let score = 0;
   questions.forEach((item, qi) => {
@@ -282,6 +305,7 @@ document.getElementById("check-btn").addEventListener("click", () => {
   const pct = Math.round((score / questions.length) * 100);
   result.textContent = `${score} / ${questions.length} Punkte (${pct} %)`;
   result.className = score >= questions.length * 0.5 ? "pass" : "fail";
+  sendAnonymesErgebnis(score, questions.length, pct);
 });
 
 document.getElementById("reset-btn").addEventListener("click", () => {
