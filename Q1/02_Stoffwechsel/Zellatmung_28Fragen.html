@@ -843,6 +843,41 @@ btnSubmit.addEventListener("click", () => {
 
 let lastScoreSummary = null;
 
+/* ============================================================
+   Anonyme Klassen-Auswertung (optional, freiwillig für den Lehrer)
+   Sendet beim Absenden im Hintergrund einen anonymen Datensatz
+   (kein Name!) an ein Google Sheet. Schlägt der Versand fehl
+   (kein Internet, Adblocker etc.), bleibt die lokale Selbst-
+   auswertung für die Schüler:innen davon unberührt.
+   ============================================================ */
+const RESULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby8x0FGzAFkhU52oOclOp5bjJ9KcYyT_Od0Br0Pj_U531KB6T2MMRBaoazxCbroERGD/exec";
+const TEST_NAME = "Zellatmung";
+
+function sendAnonymesErgebnis(summary){
+  if (!RESULT_ENDPOINT) return;
+  try {
+    const themenbloecke = summary.blockStats
+      .map(bs => `${bs.title}: ${bs.correct}/${bs.total}`)
+      .join("; ");
+    const payload = {
+      test: TEST_NAME,
+      klasse: document.getElementById("f-klasse").value || "",
+      punkte: summary.totalCorrect,
+      maxPunkte: summary.totalQuestions,
+      prozent: summary.pct,
+      themenbloecke: themenbloecke
+    };
+    fetch(RESULT_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(() => { /* stiller Fehlschlag - Selbstauswertung bleibt unberührt */ });
+  } catch (e) {
+    /* stiller Fehlschlag - Selbstauswertung bleibt unberührt */
+  }
+}
+
 function gradeAll(){
   const blockStats = BLOCKS.map(b => ({ title: b.title, color: b.color, correct: 0, total: b.questions.length }));
   let totalCorrect = 0;
@@ -899,6 +934,7 @@ function gradeAll(){
   });
 
   lastScoreSummary = { totalCorrect, totalQuestions, pct, blockStats };
+  sendAnonymesErgebnis(lastScoreSummary);
 }
 
 /* ============================================================
